@@ -1,2 +1,2 @@
 # Snake
-Snake game in tkinter
+My attempt of make the Classisc Snake using python
