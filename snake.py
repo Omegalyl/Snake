@@ -1,4 +1,6 @@
 #! /bin/env python3
+"""Snakes 1.0"""
+
 import tkinter as tk
 import random
 from tkinter import messagebox
@@ -6,20 +8,26 @@ from tkinter import messagebox
 HEAD_COLOR = "#39FF14"
 FACING = "e"
 SNAKE = []
+# ROOT window
+ROOT = tk.Tk()
+SCORE = tk.IntVar(ROOT, value=0)
+
+# 100 = Pussy
+# 60  = Normal
+# 30  = Medium
+# 0   = Hard
+SPEED = 30  # in ms
 
 
 def snakes():
-    # root window
-    root = tk.Tk()
-    global SCORE 
-    SCORE = tk.IntVar(root, value=0)
+    """A Snake game"""
 
     # main frame wxd
     main_width = 720
     main_height = 480
 
     # main frame
-    main = tk.Frame(root, bg="black")
+    main = tk.Frame(ROOT, bg="black")
     main.configure(width=main_width, height=main_height)
     main.focus_set()
     main.pack(fill=tk.BOTH, expand=True)
@@ -49,7 +57,7 @@ def snakes():
             y=random.randrange(0, main_height, head_size)
         )
 
-    def update_cordX(cord, dx):
+    def update_cord_x(cord, dx):
         cord = cord + dx
         if cord < 0:
             cord = main_width
@@ -57,7 +65,7 @@ def snakes():
             cord = 0
         return cord
 
-    def update_cordY(cord, dy):
+    def update_cord_y(cord, dy):
         cord = cord + dy
         if cord < 0:
             cord = main_height
@@ -67,13 +75,13 @@ def snakes():
 
     def change_direction(cord_x, cord_y):
         if FACING == "e":
-            return update_cordX(cord_x, -head_size), cord_y
-        elif FACING == "w":
-            return update_cordX(cord_x, head_size), cord_y
-        elif FACING == "n":
-            return cord_x, update_cordY(cord_y, -head_size)
-        elif FACING == "s":
-            return cord_x, update_cordY(cord_y, head_size)
+            return update_cord_x(cord_x, -head_size), cord_y
+        if FACING == "w":
+            return update_cord_x(cord_x, head_size), cord_y
+        if FACING == "n":
+            return cord_x, update_cord_y(cord_y, -head_size)
+        if FACING == "s":
+            return cord_x, update_cord_y(cord_y, head_size)
 
     def update_location():
         SNAKE[0].update()
@@ -109,31 +117,28 @@ def snakes():
         tail.update()
         cord_x = tail.winfo_x()
         cord_y = tail.winfo_y()
-        length = len(SNAKE)
         SNAKE.append(tk.Frame(main, bg=HEAD_COLOR))
         tail = SNAKE[-1]
         tail.configure(width=head_size, height=head_size, bd=0)
         if FACING == "e":
-            tail.place(x=update_cordX(cord_x, head_size), y=cord_y)
+            tail.place(x=update_cord_x(cord_x, head_size), y=cord_y)
         elif FACING == "w":
-            tail.place(x=update_cordX(cord_x, -head_size), y=cord_y)
+            tail.place(x=update_cord_x(cord_x, -head_size), y=cord_y)
         elif FACING == "n":
-            tail.place(x=cord_x, y=update_cordY(cord_y, head_size))
+            tail.place(x=cord_x, y=update_cord_y(cord_y, head_size))
         elif FACING == "s":
-            tail.place(x=cord_x, y=update_cordY(cord_y, -head_size))
+            tail.place(x=cord_x, y=update_cord_y(cord_y, -head_size))
 
     def loop():
-        global AFTER_ID
         update_location()
         if kill():
-            root.after_cancel(AFTER_ID)
-            root.destroy()
+            ROOT.quit()
             messagebox.showwarning("You Suck", "GAME OVER!!!")
         if check_overlap(SNAKE[0], food):
             update_score()
             spawn()
             increase_tail()
-        AFTER_ID = root.after(130, loop)
+        ROOT.after(SPEED, loop)
 
     def move(event):
         global FACING
@@ -143,19 +148,20 @@ def snakes():
             "Up": "n", "w": "n",
             "Down": "s", "s": "s",
         }
-        keypress = event.keysym
-        direction = move_map.get(keypress)
+        key = event.keysym
+        direction = move_map.get(key)
         if direction:
-            if FACING in ("e", "w") and keypress in ("Up", "Down", "w", "s"):
+            if FACING in ("e", "w") and key in ("Up", "Down", "w", "s"):
                 FACING = direction
-            elif FACING in ("n", "s") and keypress in ("Left", "a", "Right", "d"):
+            elif FACING in ("n", "s") and key in ("Left", "a", "Right", "d"):
                 FACING = direction
 
     main.bind("<KeyPress>", move)
     loop()
-    root.mainloop()
+    ROOT.mainloop()
 
 
 if __name__ == "__main__":
     print("Starting game ...")
     snakes()
+    print("Game Over")
